@@ -11,13 +11,18 @@ if strcmp(mode,'create')
  selected=randi(stream,P,features,1);
  u=min(1-eps,max(eps,rand(stream,features,1)));
  selectedDistance=distance(selected); selectedDistance=selectedDistance(:);
+ assert(isequal(size(selectedDistance),[features,1]));
  radius=sqrt((1-u).^(-2)-1)./selectedDistance;
+ assert(isequal(size(radius),[features,1]) && all(isfinite(radius)));
  azimuth=2*pi*rand(stream,features,1);
  kx=radius.*cos(azimuth);ky=radius.*sin(azimuth);
  spectral=zeros(features,P);
  for j=1:P
-  spectral(:,j)=distance(j)^2./ ...
+  marginalSpectral=distance(j)^2./ ...
       (1+(radius*distance(j)).^2).^(3/2);
+  assert(isequal(size(marginalSpectral),[features,1]) && ...
+      all(isfinite(marginalSpectral) & marginalSpectral>0));
+  spectral(:,j)=marginalSpectral;
  end
  proposal=mean(spectral,2);
  weight=sqrt(spectral./proposal);
