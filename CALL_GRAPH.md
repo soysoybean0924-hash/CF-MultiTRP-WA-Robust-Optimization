@@ -14,3 +14,4 @@ flowchart LR
 ```
 
 基础 MATLAB 入口为 `run_experiment.m`；三层有限步诊断为 `chasi_run_layered_small.m`。Python 分支仅为服务器对照/后处理，不从 MATLAB 包装调用。
+2026-11-15: v6 正式链的 Python 静态依赖审计见根 README 和 PYTHON_FILE_AUDIT_20261115.csv；旧 Python 对照仅在 archive/python-before-matlab-only-main。

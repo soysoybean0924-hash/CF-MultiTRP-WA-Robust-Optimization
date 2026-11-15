@@ -63,3 +63,5 @@ This work was supported by the FFL18-0277 grant from the Swedish Foundation for 
 ## License and Referencing
 
 This code package is licensed under the GPLv2 license. If you in any way use this code for research that results in publications, please cite our original article listed above.
+
+2026-11-15 存档说明：本文提到的 Python 文件已从 main 移至 archive/python-before-matlab-only-main；main 的 v6 正式链使用 MATLAB。

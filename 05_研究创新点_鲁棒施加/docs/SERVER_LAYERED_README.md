@@ -106,3 +106,5 @@ scp -P 22 -r user@10.112.48.104:/data/xiwai/chasi_pilot_mmse_upload/layered_mult
 ```
 
 回传首轮 `preflight.json`、`nominal_admm.json`、`layer1.json` 的摘要与两个 smoke `state.json` 后，再依据真实错误修复。所有原始检查点、manifest 和 SHA256SUMS 保持只读。
+
+2026-11-15 存档说明：本文提到的 Python 文件已从 main 移至 archive/python-before-matlab-only-main；main 的 v6 正式链使用 MATLAB。
