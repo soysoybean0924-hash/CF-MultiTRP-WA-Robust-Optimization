@@ -2,6 +2,11 @@ function info=chasi_v6_generate_parameter_trace(scene,seed,path)
 % Deterministic, on-demand UMi/UMa ray-parameter trace. No dense H tensor.
 % Scoped outdoor 7.6.3 spatial fields; independent validation remains gated.
 cfg=scene.config;assert(~isfile(path) && seed>=0 && seed==fix(seed));
+% Reject legacy fixed-name remnants before expensive trace construction.
+legacyPartial=[path '.partial'];
+assert(~isfile(legacyPartial), ...
+    'Incomplete legacy trace exists: %s. Quarantine it before retry.', ...
+    legacyPartial);
 assert(~ismember(seed,17113091+10000*(1:16)), ...
     'Receiver ensemble seed must differ from truth seed');
 assert(ismember(cfg.channelMode,{'umi_pathloss_subset','uma_pathloss_subset'}));
@@ -196,11 +201,19 @@ meta.pilotNoisePriorModelId=public.modelId;
 meta.receiverInformationSet=public.informationSet;
 meta.pathlossInputKind='public_expected_los_nlos_pathloss_db';
 folder=fileparts(path);if ~isfolder(folder),mkdir(folder);end
-partial=[path '.partial'];assert(~isfile(partial));
+% A unique same-folder staging file avoids collisions after interrupted saves.
+partial=[tempname(folder) '.mat.partial'];
+assert(~isfile(partial) && ~isfile(path));
 save(partial,'meta','links','siteFields','dropDraw', ...
     'priorRx','priorMeanH','pathlossDb', ...
     'truthPathlossDb','-v7.3');
-assert(movefile(partial,path));
+contents=whos('-file',partial);
+required={'meta','links','siteFields','dropDraw', ...
+    'priorRx','priorMeanH','pathlossDb','truthPathlossDb'};
+assert(all(ismember(required,{contents.name})), ...
+    'Staged channel trace is incomplete: %s',partial);
+assert(~isfile(path) && movefile(partial,path), ...
+    'Could not publish staged channel trace: %s',partial);
 info=struct('path',path,'sha256',chasi_sha256_file(path), ...
     'traceKind',meta.traceKind,'formalChannelEligible',false);
 end
