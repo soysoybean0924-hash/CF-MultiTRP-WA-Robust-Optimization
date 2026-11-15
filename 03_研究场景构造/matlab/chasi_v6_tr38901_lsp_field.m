@@ -10,7 +10,8 @@ if strcmp(mode,'create')
      features>=128 && features==fix(features));
  selected=randi(stream,P,features,1);
  u=min(1-eps,max(eps,rand(stream,features,1)));
- radius=sqrt((1-u).^(-2)-1)./distance(selected(:));
+ selectedDistance=distance(selected); selectedDistance=selectedDistance(:);
+ radius=sqrt((1-u).^(-2)-1)./selectedDistance;
  azimuth=2*pi*rand(stream,features,1);
  kx=radius.*cos(azimuth);ky=radius.*sin(azimuth);
  spectral=zeros(features,P);
