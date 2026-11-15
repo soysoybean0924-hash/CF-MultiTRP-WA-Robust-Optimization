@@ -1,0 +1,17 @@
+{
+  "status": "PROTOTYPE_REQUIRES_SERVER_VALIDATION",
+  "split": {"development_groups": [1,2,3,4,5,6,7,8,9], "test_groups": [10,11,12,13,14,15,16,17]},
+  "coverage_target": 0.95,
+  "risk_threshold_se": 0.01,
+  "max_outer": 1000,
+  "consecutive_outer": 5,
+  "fixed_level": 0.1,
+  "mapping": {"floor": 0.02, "ceiling": 0.25, "pilot_weight": 0.5, "age_weight": 0.3, "noise_weight": 0.1, "residual_weight": 0.1},
+  "variable_factors": {"beam": 0.9, "service": 1.2, "power": 0.9},
+  "service_source_weights": [0.1, 1.0, 0.2, 0.6],
+  "service": {"pilot_penalty": 0.25, "load_penalty": 0.05, "fixed_margin": 0.03, "trigger_margin": 0.06},
+  "power_reserve_fraction_max": 0.15,
+  "strength_scan": [0.0, 0.5, 1.0, 1.5, 2.0],
+  "quality_scan_db": [-15, -10, -5, 0],
+  "power_caps_w": [10, 15, 20]
+}

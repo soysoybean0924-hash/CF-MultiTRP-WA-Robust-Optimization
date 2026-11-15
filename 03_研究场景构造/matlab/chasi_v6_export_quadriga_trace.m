@@ -1,0 +1,73 @@
+function out=chasi_v6_export_quadriga_trace(channels,scene,priorRx, ...
+    priorMeanH,pathlossDb,meta,outPath)
+% Export externally generated QuaDRiGa UMi/UMa qd_channel objects.
+% channels is [210 UE,21 TRP] with 4 RX,64 TX,>=1341 snapshots at 1 ms.
+% priorRx is diffuse covariance [4,4,UE,TRP]; priorMeanH is the
+% conditional LOS mean [UE,TRP,4,64]. Validation metadata must come from
+% independent seeds;
+% this exporter never asserts their validity on behalf of the caller.
+cfg=scene.config;T=cfg.decisionTti+1001;
+rayInput=isstruct(channels);
+if ~rayInput
+ assert(exist('qd_channel','class')==8, ...
+     'QuaDRiGa MATLAB source is required to export qd_channel objects');
+end
+assert(isequal(size(channels),[cfg.users,cfg.trps]) && ...
+    isequal(size(priorRx),[4,4,cfg.users,cfg.trps]) && ...
+    isequal(size(priorMeanH),[cfg.users,cfg.trps,4,64]) && ...
+    isequal(size(pathlossDb),[cfg.users,cfg.trps]) && ...
+    ~isfile(outPath));
+assert(isfield(meta,'validationPassed') && ...
+    isfield(meta,'errorModelValidationPassed') && ...
+    isfield(meta,'temporalPosteriorMatched') && ...
+    isfield(meta,'posteriorTemporalModel') && ...
+    isfield(meta,'priorPosteriorMatched') && ...
+    isfield(meta,'crossUeResidualMatched') && ...
+    isfield(meta,'rayPriorAssumption') && ...
+    isfield(meta,'generatorId') && ...
+    ~isempty(meta.generatorId));
+meta.modelId='TR38901_network_v17_1';
+meta.carrierHz=cfg.frequencyGhz*1e9;
+meta.scsHz=cfg.scsHz;meta.ttiMs=cfg.ttiMs;
+meta.arrayShape=[4 8 2];meta.ueArrayShape=[1 2 2];
+meta.trpXY=scene.trp_xy;meta.ueXY=scene.ue_xy;
+meta.channelUnit='noise_normalized_channel';
+meta.channelNormalizationNoiseW=cfg.noiseWattPerRb*cfg.rbTotal;
+meta.absoluteTtiOrigin=0;
+counts=[cfg.rbGroups.count];starts=[cfg.rbGroups.start];
+centers=starts+(counts-1)/2;
+meta.groupCenterOffsetHz=(centers-(cfg.rbTotal+1)/2)*12*cfg.scsHz;
+meta.exportComplete=false;
+meta.exporterSha256=chasi_sha256_file([mfilename('fullpath') '.m']);
+folder=fileparts(outPath);if ~isfolder(folder),mkdir(folder);end
+save(outPath,'meta','priorRx','priorMeanH','pathlossDb','-v7.3');
+m=matfile(outPath,'Writable',true);
+m.H(cfg.users,cfg.trps,4,64,17,T)=complex(single(0));
+positions=.5+(centers-(cfg.rbTotal+1)/2)* ...
+    12*cfg.scsHz/cfg.bandwidthHz;
+assert(all(positions>0 & positions<1));
+for u=1:cfg.users
+ for l=1:cfg.trps
+  ch=channels(u,l);
+  if rayInput
+   assert(isfield(ch,'ray') && isfield(ch,'rx') && isfield(ch,'tx'), ...
+       'Each link needs generated ray parameters and polarized arrays');
+   h=chasi_v6_tr38901_ray_response(ch.ray,ch.rx,ch.tx, ...
+       cfg.frequencyGhz*1e9,meta.groupCenterOffsetHz, ...
+       (0:T-1)*cfg.ttiMs/1000);
+  else
+   assert(isa(ch,'qd_channel') && ch.no_rxant==4 && ...
+       ch.no_txant==64 && ch.no_snap>=T, ...
+       'QuaDRiGa channel lacks the required ports or snapshots');
+   h=fr(ch,cfg.bandwidthHz,positions,1:T);
+  end
+  assert(isequal(size(h),[4,64,17,T]) && ...
+      all(isfinite(real(h(:))) & isfinite(imag(h(:)))));
+  h=h/sqrt(meta.channelNormalizationNoiseW);
+  m.H(u,l,:,:,:,:)=reshape(single(h),1,1,4,64,17,T);
+ end
+end
+meta.exportComplete=true;m.meta=meta;
+out=struct('path',outPath,'sha256',chasi_sha256_file(outPath), ...
+    'scope','QuaDRiGa channel export; posterior validation and tool provenance remain external inputs');
+end

@@ -1,0 +1,17 @@
+# Local MATLAB state and credentials
+.matlab_pref/
+*.p12
+*.pem
+*.lic
+*.license
+# Inputs, checkpoints and generated experiment output
+**/inputs/
+07_实验结果与进展/local_runs/
+**/latest.mat
+**/summary.mat
+*.mat
+*.h5
+*.hdf5
+*.log
+__pycache__/
+*.pyc

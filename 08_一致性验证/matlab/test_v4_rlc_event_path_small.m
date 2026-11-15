@@ -1,0 +1,13 @@
+function test_v4_rlc_event_path_small()
+arrival=zeros(1,6);arrival(1)=100;arrival(5)=100;
+capacity=100*ones(1,6);bler=zeros(1,6);bler(1)=1;
+ev=chasi_v4_rlc_event_sim(arrival,capacity,bler,17);
+assert(ev.ackedBits(1)==0 && ev.retransmission(2) && ...
+    ev.ackedBits(2)==100 && ev.ackedBits(5)==100);
+count=chasi_acked_rlc_seconds(ev,1);
+assert(count.ackedBits(1)==0 && count.valid(1) && ...
+    count.effectiveSeconds(1)==.001);
+fprintf('V4_RLC attempts=%d retrans=%d ack=%d missing=%d\n', ...
+    nnz(ev.attemptedBits),nnz(ev.retransmission),sum(ev.ackedBits,'all'), ...
+    count.missingCount);
+end

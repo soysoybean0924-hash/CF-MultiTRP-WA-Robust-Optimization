@@ -1,0 +1,23 @@
+% Inspect predeclared independent seed without changing any design setting.
+startup;
+addpath(fullfile(pwd,'08_一致性验证','matlab'));
+inputPath=fullfile(pwd,'03_研究场景构造','inputs', ...
+    'srs_overlap_jakes_v3_test_seed41','input.mat');
+outDir=fullfile(pwd,'07_实验结果与进展','local_runs', ...
+    'srs_overlap_jakes_v3_test_seed41');
+validate_srs_formal_error(pwd,fullfile(outDir, ...
+    'formal_error_coverage.mat'),inputPath);
+validate_srs_source_attribution(pwd,fullfile(outDir, ...
+    'source_attribution.mat'),inputPath);
+names={'ideal_pf','nominal_pf','robust_pf'};
+rates=zeros(210,3); hash=chasi_sha256_file(inputPath);
+for i=1:3
+    x=load(fullfile(outDir,names{i},'latest.mat'),'state'); s=x.state;
+    assert(strcmp(s.inputSha256,hash) && s.iter>=1);
+    rates(:,i)=s.history(end).truePerUserSE(:);
+    fprintf('TEST_POST %s outer=%d complete=%d R5=%.7g reason=%s\n', ...
+        names{i},s.iter,s.complete,s.history(end).trueRate5,s.stopReason);
+end
+writetable(table((1:210)',rates(:,1),rates(:,2),rates(:,3), ...
+    'VariableNames',{'ueId','idealSE','nominalSE','totalCSE'}), ...
+    fullfile(outDir,'per_ue_static_se.csv'));

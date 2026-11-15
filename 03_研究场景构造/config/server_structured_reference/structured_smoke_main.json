@@ -1,0 +1,33 @@
+{
+  "status": "BUDGET_TRUNCATED_SMOKE",
+  "strength": 0.1,
+  "designRateReference": 0.05,
+  "sourceWeights": [
+    0.1,
+    1.0,
+    0.2,
+    0.6
+  ],
+  "classification": {
+    "minRelative": 0.05,
+    "dominance": 0.55,
+    "margin": 0.15,
+    "residualLimit": 0.45
+  },
+  "service": {
+    "pilotPenalty": 0.25,
+    "loadPenalty": 0.05,
+    "switchMargin": 0.03
+  },
+  "batchOuter": 2,
+  "maxOuter": 4,
+  "consecutiveOuterSteps": 3,
+  "variants": [
+    "nominal",
+    "robust",
+    "uniform",
+    "differentiated",
+    "differentiated_service",
+    "differentiated_service_graph"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "modelId": "srs_csi_joint_v6_formal",
+  "parentModelId": "srs_csi_joint_v5",
+  "parentConfig": "srs_csi_joint_v5_prb50.json",
+  "trafficModel": "target_busy_fraction_batched_sdu",
+  "targetBusyFraction": 0.3,
+  "payloadBitsPerPlannedBusyTti": 12000,
+  "tailPayloadFraction": 0.3,
+  "tailTtiFractionApprox": 0.6,
+  "ackModel": "fixed_bler_proxy_until_link_calibration",
+  "errorModel": "finite_srs_joint_gaussian_posterior_with_sequential_csi_rs_five_source_attribution",
+  "channelMode": "umi_pathloss_subset",
+  "channelSource": "generated_parameters",
+  "channelTracePath": "",
+  "channelScope": "umi_pathloss_los_shadow_subset_not_full_TR_38901",
+  "srsUlPowerControl": {
+    "mode": "ts38213_open_loop_simulated_pathloss",
+    "p0Dbm": -80,
+    "pCmaxDbm": 23,
+    "mu": 1,
+    "closedLoopAdjustmentDb": 0,
+    "referencePowerW": 0.02,
+    "fractionalCompensation": 0.8
+  }
+}

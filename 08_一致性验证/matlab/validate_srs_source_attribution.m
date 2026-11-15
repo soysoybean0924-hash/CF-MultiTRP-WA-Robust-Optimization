@@ -1,0 +1,33 @@
+function report=validate_srs_source_attribution(root,outPath,inputPath)
+%VALIDATE_SRS_SOURCE_ATTRIBUTION Algebraic and independent-draw checks.
+addpath(fullfile(root,'03_研究场景构造','matlab'));
+if nargin<3
+    inputPath=fullfile(root,'03_研究场景构造','inputs', ...
+        'srs_overlap_jakes_v3_main','input.mat');
+end
+x=load(inputPath,'data'); data=x.data;
+groups=1:numel(data.resources); sourceMean=zeros(numel(groups),4);
+mismatch=zeros(numel(groups),1);
+for i=1:numel(groups)
+    s=srs_overlap_source_statistics(data,groups(i));
+    mismatch(i)=s.maxRelativeTotalMismatch;
+    c=s.covariance;
+    for q=1:4
+        part=c(:,:,:,:,q);
+        sourceMean(i,q)=mean(real(part(:,:,1,1)+part(:,:,2,2)+ ...
+            part(:,:,3,3)+part(:,:,4,4)),'all');
+    end
+end
+assert(max(mismatch)<2e-5, ...
+    'Analytic source sum does not reconstruct stored posterior C');
+report=struct('inputSha256',chasi_sha256_file(inputPath), ...
+    'groups',groups,'sourceNames',{{'target_residual', ...
+        'pilot_pollution','observation_noise','aging_innovation'}}, ...
+    'meanTraceByGroup',sourceMean, ...
+    'maxRelativeTotalMismatchByGroup',mismatch, ...
+    'validationScope','algebraic source sum on formal input; no external source labels', ...
+    'sourceCovarianceSplitExternallyValidated',false);
+save(outPath,'report','-v7');
+fprintf('SOURCE_SUM groups=%s maxRelativeMismatch=%.7g\n', ...
+    mat2str(groups),max(mismatch));
+end

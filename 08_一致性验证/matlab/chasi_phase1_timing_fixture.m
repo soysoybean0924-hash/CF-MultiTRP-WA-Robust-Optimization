@@ -1,0 +1,23 @@
+function result=chasi_phase1_timing_fixture()
+% Hand-recomputable one-link burst: one valid TTI, one terminal TTI.
+r=struct();r.H_true=complex(zeros(1,1,4,2));r.H_true(1,1,1,1)=1;
+r.ueIds=1;r.resourceWeightNu=1/273;r.omitted_gain=0;
+s=struct('resources',r,'active_prb_ratio',1/273,...
+    'config',struct('users',1,'durationTti',3,'seed',1,...
+    'trafficModel','target_busy_fraction','trafficLoad',.3,...
+    'scsHz',30000,'ttiMs',1,'rbTotal',273));
+v=complex(zeros(1,1,2,1));v(1,1,1,1)=1;
+sol=struct('precoder',{{v}});
+traffic=struct('busy',logical([1 1 0]),'tail',logical([0 1 0]),...
+    'terminal',logical([0 1 0]));
+m=chasi_evaluate(s,sol,traffic);
+assert(m.per_ue_valid_tti==1);
+assert(abs(m.per_ue_delivered_bits_proxy-360)<1e-9);
+assert(abs(m.per_ue_experience_mbps-.36)<1e-9);
+assert(abs(m.total_radiated_power_watt-1/273)<1e-12);
+result=struct('valid_tti',m.per_ue_valid_tti,...
+    'delivered_bits',m.per_ue_delivered_bits_proxy,...
+    'experience_mbps',m.per_ue_experience_mbps,...
+    'total_power_w',m.total_radiated_power_watt,'passed',true);
+disp(result)
+end

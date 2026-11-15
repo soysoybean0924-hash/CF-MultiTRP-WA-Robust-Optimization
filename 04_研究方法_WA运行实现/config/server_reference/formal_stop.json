@@ -1,0 +1,7 @@
+{
+  "objectiveRelativeTolerance": 0.00001,
+  "covarianceRelativeTolerance": 0.0001,
+  "consecutiveOuter": 5,
+  "requireAdmmConverged": true,
+  "note": "Formal Python campaign only; frozen MATLAB input/config SHA256 is unchanged."
+}

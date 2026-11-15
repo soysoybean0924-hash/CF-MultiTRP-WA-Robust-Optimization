@@ -1,0 +1,18 @@
+{
+  "status": "NOT_RUN",
+  "baseConfig": "experiment.json",
+  "sharedTrueChannelSeed": 19,
+  "sharedInitialSeed": 901,
+  "fixedSrsHopMs": 20,
+  "fixedFullBandRevisitMs": 340,
+  "variants": [
+    {"name": "historical_two_rows", "srsRows": [1, 2], "aging": "exponential_120ms", "pilotReuse": true},
+    {"name": "no_aging", "srsRows": [1, 2], "aging": "off", "pilotReuse": true},
+    {"name": "no_contamination", "srsRows": [1, 2], "aging": "exponential_120ms", "pilotReuse": false},
+    {"name": "two_pair_switch", "srsRows": [0, 1, 2, 3], "events": [
+      {"rows": [0, 1], "time_ms": null, "resource": null, "energy": null},
+      {"rows": [2, 3], "time_ms": null, "resource": null, "energy": null}
+    ], "aging": "exponential_120ms", "pilotReuse": true}
+  ],
+  "note": "Configuration contract only. Null event values deliberately block execution until schedule and energy are supplied; same true-channel realization and initial point must be used."
+}
