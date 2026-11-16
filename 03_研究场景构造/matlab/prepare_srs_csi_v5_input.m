@@ -3,6 +3,9 @@ function info=prepare_srs_csi_v5_input(root,configPath,inputPath)
 assert(~isfile(inputPath) && isfolder(root));
 addpath(fullfile(root,'03_研究场景构造','matlab'),fullfile(root,'04_研究方法_WA运行实现','matlab'));
 c=jsondecode(fileread(configPath));
+parent=fileparts(inputPath);if ~isfolder(parent),mkdir(parent);end
+inputClock=tic;
+progressPath=[inputPath '.progress.log'];
 assert(strcmp(c.modelId,'srs_csi_joint_v5'));
 assert(c.prbUtilization==.5 && strcmp(c.scheduleMode,'legacy_random_full_groups'));
 assert(c.measurementBeforeDecisionAtSameTti && ...
@@ -349,6 +352,12 @@ for g=1:G
         'realizedErrorOuterByTxAverage',realized, ...
         'expectedConditionalCovariance',resources(g).C, ...
         'definition','single realization diagnostic only; never available to policy');
+    fid=fopen(progressPath,'a');
+    assert(fid>0,'Cannot append parent input progress log');
+    fprintf(fid,'%s group=%d/%d elapsed_s=%.3f\n', ...
+        datestr(now,31),g,G,toc(inputClock));fclose(fid);
+    fprintf('V5_PARENT group=%d/%d elapsed_s=%.3f\n', ...
+        g,G,toc(inputClock));
 end
 % Native v4 runner calls the same deterministic feasible initialization
 % for every branch; the historical common-initial helper assumes the old
@@ -386,6 +395,8 @@ data=struct('modelId',c.modelId,'config',c, ...
     'initialPrecoder',{initialPrecoder},'initialPower',initialPower, ...
     'sourceCodeSha256',chasi_sha256_file([mfilename('fullpath') '.m']), ...
     'snapshotCodeSha256',chasi_sha256_file(fullfile(root,'03_研究场景构造','matlab',snapshotFile)));
+data.channelRebuildRuntimeSha256=chasi_sha256_file(which('chasi_v6_tr38901_rebuild_link'));
+data.losEventRuntimeSha256=chasi_sha256_file(which('chasi_v6_los_transition_events'));
 data.sceneGeneratorSha256=chasi_sha256_file(fullfile(root,'03_研究场景构造','matlab','chasi_generate_scene.m'));
 data.sceneConfigSha256=chasi_sha256_file(fullfile(root,'02_研究背景搭建','matlab','chasi_config.m'));
 parent=fileparts(inputPath); if ~isfolder(parent), mkdir(parent); end

@@ -43,31 +43,10 @@ if elapsed>0 && nargin<7
  diffuse=ray.clusterIndex>0;
  % 7.6.3.3 permits a hard LOS/NLOS transition. Restart the phase integral
  % for the newly selected condition; do not splice rays from two states.
- pathSteps=max(1,ceil(norm(velocity)*elapsed/.1));
- previousTime=0;
- previousLos=chasi_v6_tr38901_site_field('los',siteField, ...
-     double(link.ray.initialXY),trp);
- for pathStep=1:pathSteps
-  nextTime=elapsed*pathStep/pathSteps;
-  nextXY=double(link.ray.initialXY(:).')+nextTime*velocity(1:2);
-  nextLos=chasi_v6_tr38901_site_field('los',siteField,nextXY,trp);
-  if nextLos~=previousLos
-   transitionCount=transitionCount+1;
-   low=previousTime;high=nextTime;
-   for bisect=1:24
-    middle=(low+high)/2;
-    middleXY=double(link.ray.initialXY(:).')+middle*velocity(1:2);
-    if chasi_v6_tr38901_site_field( ...
-            'los',siteField,middleXY,trp)==previousLos
-     low=middle;
-    else
-     high=middle;
-    end
-   end
-   transitionStart=high;
-  end
-  previousTime=nextTime;previousLos=nextLos;
- end
+ [transitionStart,transitionCount]=chasi_v6_los_transition_events( ...
+     siteField,double(link.ray.initialXY),velocity,trp,elapsed);
+ assert(chasi_v6_tr38901_site_field('los',siteField, ...
+     double(link.ray.initialXY(:).')+elapsed*velocity(1:2),trp)==isLos);
  duration=elapsed-transitionStart;
  steps=max(1,ceil(norm(velocity)*duration/.25));
  dt=duration/steps;phaseIntegral=zeros(nnz(diffuse),1);
