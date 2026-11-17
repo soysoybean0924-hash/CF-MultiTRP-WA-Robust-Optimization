@@ -10,7 +10,4 @@ MATLAB R2026b：在根目录运行 `startup; run_experiment('input')` 生成独�
 
 诊断图：在具备 Matplotlib 的 Python 环境执行 `05_研究创新点_鲁棒施加/run_server_diagnostic_plots.ps1`，脚本设置本地 `SRS_CJK_FONT`，从本工程 07 中已归档的 state.json 读取，并输出新目录。另有 `python/plot_power_scan.py` 用于功率诊断图。MATLAB 批处理绘图在本机 connector 崩溃，故根入口不自动绘图；可在图形环境单独调用 `chasi_plot_layered_diagnostic.m`。
 
-## v6 MATLAB-only main（2026-11-15 静态审计）
-当前 main 的正式入口为 `05_研究创新点_鲁棒施加/matlab/run_v6_online_formal.m`。它调用 `prepare_srs_csi_v6_formal_input`、`chasi_v6_make_ablation_configs`、`run_v5_online_six`，再由 `chasi_v5_protocol_finalize` 调用 `chasi_two_objective_decision` 和 `chasi_v6_formal_decision_gate`。默认配置 `03_研究场景构造/config/srs_csi_joint_v6_formal.json` 的 `channelSource=generated_parameters`；`chasi_v6_generate_parameter_trace` 以 MATLAB 生成所需通道参数，父输入由 `prepare_srs_csi_v5_input` 生成。静态检查未发现该链调用 Python 或依赖 Python 独有的必需输入。若改选 `validated_external`，仍需另行提供外部 MAT；此结论不覆盖该可选路径。
 
-66 个 Python 文件逐项分类及移除清单见 `PYTHON_FILE_AUDIT_20261115.csv`。原文件保存在远端分支 `archive/python-before-matlab-only-main`（提交 `36487ea`）；历史文档中的 Python 命令仅适用于该分支。此次未运行 MATLAB，未作运行验证。
